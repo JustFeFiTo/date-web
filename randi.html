@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Eljönnél velem randira?</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: linear-gradient(135deg, #ffe4ec 0%, #fff5f8 50%, #ffe4ec 100%);
+  }
+  .card {
+    position: relative;
+    width: 100%;
+    max-width: 640px;
+    min-height: 480px;
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+    padding: 40px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    overflow: hidden;
+  }
+  h1 { font-size: clamp(28px, 5vw, 44px); color: #db2777; }
+  h2 { font-size: clamp(24px, 4vw, 32px); color: #db2777; }
+  p.sub { color: #6b7280; }
+  .emoji { font-size: 56px; }
+  .emoji-lg { font-size: 72px; }
+  .buttons { display: flex; gap: 24px; padding-top: 16px; flex-wrap: wrap; justify-content: center; position: relative; }
+  button {
+    font-family: inherit;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    border-radius: 9999px;
+    padding: 16px 36px;
+    font-size: 18px;
+    transition: transform 0.2s ease, background 0.2s ease;
+  }
+  .yes { background: #ec4899; color: #fff; box-shadow: 0 10px 25px rgba(236,72,153,0.4); }
+  .yes:hover { background: #db2777; transform: scale(1.1); }
+  .no { background: #e5e7eb; color: #374151; position: relative; transition: transform 0.2s ease; }
+  .grid { display: grid; gap: 12px; width: 100%; padding-top: 12px; }
+  .grid-times { grid-template-columns: repeat(2, 1fr); }
+  .grid-foods { grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 520px) {
+    .grid-times { grid-template-columns: 1fr; }
+    .grid-foods { grid-template-columns: repeat(2, 1fr); }
+  }
+  .option {
+    background: #fdf2f8;
+    border: 2px solid #fbcfe8;
+    color: #be185d;
+    border-radius: 16px;
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .option:hover { background: #fce7f3; border-color: #f472b6; transform: scale(1.05); }
+  .option .food-emoji { font-size: 40px; }
+  .bounce { animation: bounce 1s infinite; }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+  }
+  .hidden { display: none; }
+  .highlight { color: #db2777; font-weight: 700; }
+</style>
+</head>
+<body>
+  <div class="card" id="card">
+
+    <!-- 1. ASK -->
+    <section id="step-ask">
+      <!-- <div class="emoji">💖</div> -->
+	  <div class="emoji"><img src="imgs/image1.jpg"></div>
+      <h1>Eljönnél velem randira?</h1>
+      <p class="sub">(Az IGEN gomb szép színes)</p>
+      <div class="buttons">
+        <button class="yes" id="yesBtn">IGEN 💕</button>
+        <button class="no" id="noBtn">NEM 😿</button>
+      </div>
+    </section>
+
+    <!-- 2. TIME -->
+    <section id="step-time" class="hidden">
+      <!-- <div class="emoji">📅</div> -->
+	  <div class="emoji"><img src="imgs/image2.jpg"></div>
+      <h2>Mikor érsz rá?</h2>
+      <p class="sub">Válassz egy időpontot!</p>
+      <div class="grid grid-times" id="timesGrid"></div>
+    </section>
+
+    <!-- 3. FOOD -->
+    <section id="step-food" class="hidden">
+      <!-- <div class="emoji">🍽️</div> -->
+	  <div class="emoji"><img src="imgs/cat.gif"></div>
+      <h2>Milyen ínycsiklandó lakomát szeretnél?</h2>
+      <p class="sub">Válassz egyet a kedvenceid közül!</p>
+      <div class="grid grid-foods" id="foodsGrid"></div>
+    </section>
+
+    <!-- 4. DONE -->
+    <section id="step-done" class="hidden">
+      <!-- <div class="emoji-lg bounce">🎉</div> -->
+	  <div class="emoji-lg bounce"><img src="imgs/yippie.gif"></div>
+      <!-- <h1 style="font-size: clamp(40px, 8vw, 72px);">YIPPIE!</h1> -->
+      <p style="font-size: 20px; color: #374151;">
+        Találkozunk <span class="highlight" id="doneTime"></span>-kor,
+        és eszünk egy kis <span class="highlight" id="doneFood"></span>!
+      </p>
+      <div style="font-size: 36px;">💖✨💖</div>
+    </section>
+  </div>
+
+<script>
+  const TIMES = ["Péntek 14:00","Péntek 16:00","Szombat 12:00","Szombat 16:00","Vasárnap 12:00","Vasárnap 16:00"];
+  const FOODS = [
+    {emoji:"🍕", name:"Pizzát"}, {emoji:"🥙", name:"Gyrost"}, {emoji:"🍔", name:"Hamburgert"},
+    {emoji:"🍝", name:"Sajt szószos baconos tésztát"}, {emoji:"🌮", name:"Tacot"}, {emoji:"🍜", name:"Rament"}
+  ];
+
+  const card = document.getElementById('card');
+  const noBtn = document.getElementById('noBtn');
+  const yesBtn = document.getElementById('yesBtn');
+
+  function dodge() {
+    const rect = card.getBoundingClientRect();
+    const maxX = rect.width / 2 - 80;
+    const maxY = rect.height / 2 - 60;
+    const x = (Math.random() * 2 - 1) * maxX;
+    const y = (Math.random() * 2 - 1) * maxY;
+    noBtn.style.transform = `translate(${x}px, ${y}px)`;
+  }
+  noBtn.addEventListener('mouseenter', dodge);
+  noBtn.addEventListener('focus', dodge);
+  noBtn.addEventListener('click', dodge);
+  noBtn.addEventListener('touchstart', dodge);
+
+  function show(id) {
+    ['step-ask','step-time','step-food','step-done'].forEach(s => {
+      document.getElementById(s).classList.add('hidden');
+    });
+    document.getElementById(id).classList.remove('hidden');
+  }
+
+  yesBtn.addEventListener('click', () => {
+    const grid = document.getElementById('timesGrid');
+    grid.innerHTML = '';
+    TIMES.forEach(t => {
+      const b = document.createElement('button');
+      b.className = 'option';
+      b.textContent = t;
+      b.onclick = () => {
+        document.getElementById('doneTime').textContent = t;
+        showFoods();
+      };
+      grid.appendChild(b);
+    });
+    show('step-time');
+  });
+
+  function showFoods() {
+    const grid = document.getElementById('foodsGrid');
+    grid.innerHTML = '';
+    FOODS.forEach(f => {
+      const b = document.createElement('button');
+      b.className = 'option';
+      b.innerHTML = `<span class="food-emoji">${f.emoji}</span><span>${f.name}</span>`;
+      b.onclick = () => {
+        document.getElementById('doneFood').textContent = `${f.name} ${f.emoji}`;
+        show('step-done');
+      };
+      grid.appendChild(b);
+    });
+    show('step-food');
+  }
+</script>
+</body>
+</html>
